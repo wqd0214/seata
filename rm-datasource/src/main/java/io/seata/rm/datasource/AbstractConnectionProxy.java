@@ -23,6 +23,8 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.util.JdbcConstants;
+
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -118,7 +120,11 @@ public abstract class AbstractConnectionProxy implements Connection {
                             sqlRecognizer.getTableName(), getDataSourceProxy().getResourceId());
                     String[] pkNameArray = new String[tableMeta.getPrimaryKeyOnlyName().size()];
                     tableMeta.getPrimaryKeyOnlyName().toArray(pkNameArray);
-                    targetPreparedStatement = getTargetConnection().prepareStatement(sql,pkNameArray);
+                    if (dbType.equals(JdbcConstants.SQLSERVER)) {
+                        targetPreparedStatement = getTargetConnection().prepareStatement(sql);
+                    } else {
+                        targetPreparedStatement = getTargetConnection().prepareStatement(sql,pkNameArray);
+                    }
                 }
             }
         }
